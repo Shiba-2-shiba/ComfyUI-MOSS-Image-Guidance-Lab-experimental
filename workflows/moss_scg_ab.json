@@ -1,0 +1,1247 @@
+{
+  "id": "27d2bb65-86e7-4def-8604-772c6e4330fb",
+  "revision": 2,
+  "last_node_id": 22,
+  "last_link_id": 34,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [
+        -252.86308653506188,
+        -45.47642633975573
+      ],
+      "size": [
+        286,
+        102
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            33
+          ]
+        }
+      ],
+      "title": "Native MOSS-Image SFT",
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Moody-Moss-Mix-V5.5_00001__clean-int8_convrot.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "Moody-Moss-Mix-V5.5_00001__clean-int8_convrot.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [
+        -192.69972094939283,
+        148.05353817222834
+      ],
+      "size": [
+        286,
+        126
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            1,
+            2
+          ]
+        }
+      ],
+      "title": "MOSS-Image text encoder",
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "qwen3.5_9b_int8_convrot.safetensors",
+        "moss_image",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3.5_9b_int8_convrot.safetensors",
+        "type": "moss_image",
+        "device": "default"
+      }
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [
+        -198.53910643270774,
+        328.7590782249724
+      ],
+      "size": [
+        286,
+        102
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            18,
+            26
+          ]
+        }
+      ],
+      "title": "Shared FLUX.2 VAE",
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "flux2-vae_small.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "flux2-vae_small.safetensors"
+      }
+    },
+    {
+      "id": 4,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        -180.04771906887714,
+        478.62523279440154
+      ],
+      "size": [
+        286,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            16,
+            24
+          ]
+        }
+      ],
+      "title": "Shared latent (1024 × 1024)",
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 5,
+      "type": "RandomNoise",
+      "pos": [
+        0,
+        615
+      ],
+      "size": [
+        286,
+        102
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "slot_index": 0,
+          "links": [
+            12,
+            20
+          ]
+        }
+      ],
+      "title": "Shared seed (fixed)",
+      "properties": {
+        "Node name for S&R": "RandomNoise",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        438829726369282,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 438829726369282,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        350,
+        0
+      ],
+      "size": [
+        360,
+        185
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            9
+          ]
+        }
+      ],
+      "title": "Shared positive prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "A candid editorial photograph of a person in a dark emerald coat waiting at a tiled railway platform on a rainy evening. Amber lamps reflect in the wet floor, cool blue light enters from the far end, and a rectangular station sign reads “NORTH LINE”. Natural facial proportions, restrained color, fine wool texture, and clear reflections."
+      ],
+      "widgets_values_named": {
+        "text": "A candid editorial photograph of a person in a dark emerald coat waiting at a tiled railway platform on a rainy evening. Amber lamps reflect in the wet floor, cool blue light enters from the far end, and a rectangular station sign reads “NORTH LINE”. Natural facial proportions, restrained color, fine wool texture, and clear reflections."
+      }
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        350,
+        230
+      ],
+      "size": [
+        360,
+        110
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            10
+          ]
+        }
+      ],
+      "title": "Shared negative prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "sagging breasts, drooping breasts, low-set breasts, small breasts, flat chest, mature appearance, worst quality, low quality, bad anatomy, deformed hands, extra fingers, malformed limbs, distorted face, plastic skin, overly smooth skin, waxy skin, airbrushed skin, oversharpening, excessive skin retouching, studio lighting, HDR, oversaturated, 3d render, illustration, watermark, text, logo, elongated breasts, breasts extending to the waist"
+      ],
+      "widgets_values_named": {
+        "text": "sagging breasts, drooping breasts, low-set breasts, small breasts, flat chest, mature appearance, worst quality, low quality, bad anatomy, deformed hands, extra fingers, malformed limbs, distorted face, plastic skin, overly smooth skin, waxy skin, airbrushed skin, oversharpening, excessive skin retouching, studio lighting, HDR, oversaturated, 3d render, illustration, watermark, text, logo, elongated breasts, breasts extending to the waist"
+      }
+    },
+    {
+      "id": 8,
+      "type": "PrimitiveFloat",
+      "pos": [
+        350,
+        385
+      ],
+      "size": [
+        360,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "slot_index": 0,
+          "links": [
+            11
+          ]
+        }
+      ],
+      "title": "Shared CFG",
+      "properties": {
+        "Node name for S&R": "PrimitiveFloat",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        3.5
+      ],
+      "widgets_values_named": {
+        "value": 3.5
+      }
+    },
+    {
+      "id": 9,
+      "type": "BasicScheduler",
+      "pos": [
+        350,
+        495
+      ],
+      "size": [
+        286,
+        120
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "slot_index": 0,
+          "links": [
+            15,
+            23
+          ]
+        }
+      ],
+      "title": "Simple / 25 updates",
+      "properties": {
+        "Node name for S&R": "BasicScheduler",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "simple",
+        25,
+        1
+      ],
+      "widgets_values_named": {
+        "scheduler": "simple",
+        "steps": 25,
+        "denoise": 1
+      }
+    },
+    {
+      "id": 10,
+      "type": "KSamplerSelect",
+      "pos": [
+        755,
+        120
+      ],
+      "size": [
+        286,
+        95
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "slot_index": 0,
+          "links": [
+            14
+          ]
+        }
+      ],
+      "title": "Native Euler",
+      "properties": {
+        "Node name for S&R": "KSamplerSelect",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "euler"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "euler"
+      }
+    },
+    {
+      "id": 13,
+      "type": "MossImageSCGEuler",
+      "pos": [
+        755,
+        270
+      ],
+      "size": [
+        286,
+        250
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "profile",
+          "shape": 7,
+          "type": "MOSS_SCG_PROFILE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "slot_index": 0,
+          "links": [
+            22
+          ]
+        }
+      ],
+      "title": "SCG Euler / fitted MOSS spectrum",
+      "properties": {
+        "Node name for S&R": "MossImageSCGEuler",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        0.15,
+        0.1,
+        0.95,
+        "off",
+        0.0,
+        "",
+        "packed"
+      ],
+      "widgets_values_named": {
+        "strength": 0.15,
+        "sigma_min": 0.1,
+        "sigma_max": 0.95,
+        "debug_log": "off",
+        "within_bin_mix": 0.0,
+        "budget_trace": "",
+        "spectrum_space": "packed"
+      }
+    },
+    {
+      "id": 14,
+      "type": "CFGGuider",
+      "pos": [
+        698.3756559193703,
+        538.3121720403149
+      ],
+      "size": [
+        286,
+        125
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 30
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "cfg",
+          "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "slot_index": 0,
+          "links": [
+            13,
+            21
+          ]
+        }
+      ],
+      "title": "Shared native CFG guider",
+      "properties": {
+        "Node name for S&R": "CFGGuider",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "cfg": true
+          },
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        2.5
+      ],
+      "widgets_values_named": {
+        "cfg": 2.5
+      }
+    },
+    {
+      "id": 15,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1080,
+        80
+      ],
+      "size": [
+        286,
+        135
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 12
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 13
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 14
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 15
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "euler",
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        1450,
+        80
+      ],
+      "size": [
+        286,
+        95
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 17
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            19
+          ]
+        }
+      ],
+      "title": "Decode euler",
+      "properties": {
+        "Node name for S&R": "VAEDecode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "pos": [
+        1780,
+        80
+      ],
+      "size": [
+        428.4455990153238,
+        258.84757380009563
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "Save euler",
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "moss_scg_ab/euler"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "moss_scg_ab/euler"
+      }
+    },
+    {
+      "id": 18,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1080,
+        420
+      ],
+      "size": [
+        286,
+        135
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 20
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 21
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 22
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 23
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            25
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "scg",
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 19,
+      "type": "VAEDecode",
+      "pos": [
+        1450,
+        420
+      ],
+      "size": [
+        286,
+        95
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 25
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            27
+          ]
+        }
+      ],
+      "title": "Decode scg",
+      "properties": {
+        "Node name for S&R": "VAEDecode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": "SaveImage",
+      "pos": [
+        1780,
+        420
+      ],
+      "size": [
+        459.4120371844182,
+        250.00002003749722
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "Save scg",
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "moss_scg_ab/scg"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "moss_scg_ab/scg"
+      }
+    },
+    {
+      "id": 21,
+      "type": "MossImageBlockTunePreset",
+      "pos": [
+        85.94760368830305,
+        -45.28135249277241
+      ],
+      "size": [
+        225,
+        133.9999824213206
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            30,
+            32
+          ]
+        },
+        {
+          "name": "report",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MossImageBlockTunePreset",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "image_3_individual_qkv_partial",
+        "static"
+      ],
+      "widgets_values_named": {
+        "preset": "image_3_individual_qkv_partial",
+        "application": "static"
+      }
+    },
+    {
+      "id": 22,
+      "type": "LoadLoraModel",
+      "pos": [
+        -92.11750753215452,
+        -298.654214275635
+      ],
+      "size": [
+        274.8794921875,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 33
+        },
+        {
+          "label": "LoRA #1 lora_name",
+          "name": "loras.0.lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "loras.0.lora_name"
+          },
+          "link": null
+        },
+        {
+          "label": "LoRA #1 strength",
+          "name": "loras.0.strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "loras.0.strength"
+          },
+          "link": null
+        },
+        {
+          "label": "LoRA #1 enabled",
+          "name": "loras.0.enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "loras.0.enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "LoadLoraModel"
+      },
+      "widgets_values": [
+        1,
+        "MoodyMoss\\realistic_femaleonly_deaging.safetensors",
+        1,
+        true
+      ],
+      "widgets_values_named": {
+        "loras": 1,
+        "loras.0.lora_name": "MoodyMoss\\realistic_femaleonly_deaging.safetensors",
+        "loras.0.strength": 1,
+        "loras.0.enabled": true
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      6,
+      0,
+      14,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      7,
+      0,
+      14,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      8,
+      0,
+      14,
+      3,
+      "FLOAT"
+    ],
+    [
+      12,
+      5,
+      0,
+      15,
+      0,
+      "NOISE"
+    ],
+    [
+      13,
+      14,
+      0,
+      15,
+      1,
+      "GUIDER"
+    ],
+    [
+      14,
+      10,
+      0,
+      15,
+      2,
+      "SAMPLER"
+    ],
+    [
+      15,
+      9,
+      0,
+      15,
+      3,
+      "SIGMAS"
+    ],
+    [
+      16,
+      4,
+      0,
+      15,
+      4,
+      "LATENT"
+    ],
+    [
+      17,
+      15,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      18,
+      3,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      19,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      5,
+      0,
+      18,
+      0,
+      "NOISE"
+    ],
+    [
+      21,
+      14,
+      0,
+      18,
+      1,
+      "GUIDER"
+    ],
+    [
+      22,
+      13,
+      0,
+      18,
+      2,
+      "SAMPLER"
+    ],
+    [
+      23,
+      9,
+      0,
+      18,
+      3,
+      "SIGMAS"
+    ],
+    [
+      24,
+      4,
+      0,
+      18,
+      4,
+      "LATENT"
+    ],
+    [
+      25,
+      18,
+      0,
+      19,
+      0,
+      "LATENT"
+    ],
+    [
+      26,
+      3,
+      0,
+      19,
+      1,
+      "VAE"
+    ],
+    [
+      27,
+      19,
+      0,
+      20,
+      0,
+      "IMAGE"
+    ],
+    [
+      30,
+      21,
+      0,
+      14,
+      0,
+      "MODEL"
+    ],
+    [
+      32,
+      21,
+      0,
+      9,
+      0,
+      "MODEL"
+    ],
+    [
+      33,
+      1,
+      0,
+      22,
+      0,
+      "MODEL"
+    ],
+    [
+      34,
+      22,
+      0,
+      21,
+      0,
+      "MODEL"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.027505380000001,
+      "offset": [
+        818.9068129690148,
+        586.9982556469803
+      ]
+    },
+    "ue_links": [],
+    "frontendVersion": "1.59.1"
+  },
+  "version": 0.4
+}
