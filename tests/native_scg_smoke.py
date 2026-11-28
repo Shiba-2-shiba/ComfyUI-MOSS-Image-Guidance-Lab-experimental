@@ -13,6 +13,42 @@ from unittest.mock import patch
 import torch
 
 
+def check_two_pass(model, addon, empty):
+    from comfy_extras.nodes_custom_sampler import BasicScheduler, CFGGuider, RandomNoise, SamplerCustomAdvanced, SplitSigmas
+    from comfy_extras.nodes_model_advanced import ModelSamplingAuraFlow
+    from nodes import KSamplerAdvanced, LatentUpscaleBy
+
+    model, = ModelSamplingAuraFlow().patch_aura(model, 5, "flow")
+    positive, negative = [[torch.full((1, 3, 8), .5), {}]], [[torch.zeros(1, 3, 8), {}]]
+    guider, = CFGGuider.execute(model, positive, negative, 6.).result
+
+    def run_pass(latent, stage, steps, cut, seed, strength):
+        first = stage == "first_pass"
+        if strength is None:
+            return KSamplerAdvanced().sample(
+                model, "enable", seed, steps, 6., "euler", "simple", positive, negative, latent,
+                0 if first else cut, cut if first else steps, "enable" if first else "disable",
+            )[0]
+        grid, = BasicScheduler.execute(model, "simple", steps, 1.).result
+        sigmas = SplitSigmas.execute(grid, cut).result[0 if first else 1]
+        sampler, = addon.MossImageSCGEuler.execute(strength=strength, sampling_pass=stage).result
+        noise, = RandomNoise.execute(seed).result
+        return SamplerCustomAdvanced.execute(noise, guider, sampler, sigmas, latent).result[0]
+
+    runs = []
+    for strength in (None, 0., .45):
+        first = run_pass({"samples": empty}, "first_pass", 18, 15, 42, strength)
+        enlarged, = LatentUpscaleBy().upscale(first, "bicubic", 1.5)
+        final = run_pass(enlarged, "second_pass", 25, 5, 35, strength)
+        runs.append((first["samples"], final["samples"]))
+    for baseline, disabled, corrected in zip(*runs):
+        assert torch.equal(baseline, disabled)
+        assert torch.isfinite(corrected).all() and not torch.equal(baseline, corrected)
+    same_latent_control = run_pass(enlarged, "second_pass", 25, 5, 35, None)
+    assert not torch.equal(same_latent_control["samples"], runs[-1][1])
+    print("Two-pass native MOSS: both outputs at strength 0 matched KSamplerAdvanced Euler; active SCG changed both.")
+
+
 def main():
     import comfy.cli_args
 
@@ -71,6 +107,7 @@ def main():
             hook.remove()
 
     with torch.inference_mode():
+        check_two_pass(model, addon, empty)
         for scale, neg_length, expected in ((1.0, 3, [1] * 3), (2.5, 3, [2] * 3), (2.5, 2, [1] * 6)):
             original, original_calls = generate(stock, scale, neg_length)
             bypassed, bypassed_calls = generate(disabled, scale, neg_length)

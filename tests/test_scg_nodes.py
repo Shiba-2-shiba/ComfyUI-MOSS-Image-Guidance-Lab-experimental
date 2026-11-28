@@ -154,14 +154,39 @@ def sampler(nodes, profile=None, **params):
     return nodes.MossImageSCGEuler.execute(profile=profile, **params).result[0]
 
 
+@pytest.mark.parametrize("stage,grid", [("first_pass", [1., .7, .4]), ("second_pass", [.8, .4, 0.])])
+def test_scg_pass_uses_only_supplied_updates(nodes, inputs, stage, grid):
+    model, _, _, x = inputs
+    wrapped = KSamplerX0Inpaint(model)
+    if stage == "second_pass":
+        wrapped.latent_image = x * .3
+    sigmas = torch.tensor(grid)
+    actual = sampler(nodes, sampling_pass=stage)(wrapped, x, sigmas, disable=True)
+    assert [s.item() for _, s in wrapped.calls] == pytest.approx(grid[:-1])
+    assert torch.isfinite(actual).all()
+    assert not torch.equal(actual, stock_euler(KSamplerX0Inpaint(model), x, sigmas))
+
+
+@pytest.mark.parametrize("stage,grid", [
+    ("first_pass", [.8, .5]), ("second_pass", [.8, .5]), ("second_pass", [1., .5, 0.]),
+    ("second_pass", [.8, .8, 0.]), ("first_pass", [1., float("nan"), .4]),
+])
+def test_scg_pass_rejects_invalid_grid_before_sampling(nodes, inputs, stage, grid):
+    model, _, _, x = inputs
+    wrapped = KSamplerX0Inpaint(model)
+    with pytest.raises(ValueError, match="sigma"):
+        sampler(nodes, sampling_pass=stage)(wrapped, x, torch.tensor(grid), disable=True)
+    assert not wrapped.calls
+
+
 def test_schema_and_calibration_use_input_vae_and_normalize_once(nodes, inputs):
     model, vae, images, x = inputs
     profile_node = nodes.MossImageSCGProfile.define_schema()
     sampler_node = nodes.MossImageSCGEuler.define_schema()
     assert [p.name for p in profile_node.inputs] == ["model", "vae", "images"]
     assert [p.name for p in sampler_node.inputs] == ["profile", "strength", "sigma_min", "sigma_max", "debug_log",
-                                                      "within_bin_mix", "budget_trace", "spectrum_space"]
-    assert [p.default for p in sampler_node.inputs[-4:]] == ["off", 0., "", "packed"]
+                                                      "within_bin_mix", "budget_trace", "spectrum_space", "sampling_pass"]
+    assert [p.default for p in sampler_node.inputs[-5:]] == ["off", 0., "", "packed", "full"]
     profile = build(nodes, inputs)
     assert model.normalized == 1
     assert vae.inputs == [images]

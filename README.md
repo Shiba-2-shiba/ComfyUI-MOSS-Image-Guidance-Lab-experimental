@@ -1,6 +1,6 @@
 # ComfyUI MOSS-Image Guidance Lab
 
-ComfyUIネイティブのMOSS-Imageで、静止画のテキスト生成を比較する実験用ノードです。**SCGとLEAP** をそれぞれ独立に比較できます。画像編集、動画、部分デノイズ、他モデル、SCGとLEAPの併用、AFM・SLGなどとの組み合わせはこの版の検証対象外です。
+ComfyUIネイティブのMOSS-Imageで、静止画のテキスト生成を比較する実験用ノードです。**SCGとLEAP** をそれぞれ独立に比較できます。SCGは1段生成と、生成途中のlatentを拡大する2段生成に対応しています。画像編集、動画、他モデル、SCGとLEAPの併用、AFM・SLGなどとの組み合わせはこの版の検証対象外です。
 
 ## インストール
 
@@ -11,11 +11,13 @@ ComfyUIネイティブのMOSS-Imageで、静止画のテキスト生成を比較
 ### 比較時の注意
 
 - ネイティブのサンプリング設定を変更しません。標準の `ModelSamplingSD3` でネイティブMOSSのshiftを調整しないでください。明示調整は `ModelSamplingAuraFlow` の `flow` モードで行い、対照も同じ値にしてください。
-- SCGの配布グラフでは、`Load LoRA (Model)` → `MOSS Image Block Tune Preset`（`static`）の出力をガイダーとスケジューラーで共有します。BlockTuneには `AFM_for_MossImage_experimental` が必要です。素のモデルで比較する場合は、モデルローダーの出力をこの2か所に直接つないでください。
+- 1段のSCG比較グラフでは、`Load LoRA (Model)` → `MOSS Image Block Tune Preset`（`static`）の出力をガイダーとスケジューラーで共有します。BlockTuneには `AFM_for_MossImage_experimental` が必要です。素のモデルで比較する場合は、モデルローダーの出力をこの2か所に直接つないでください。
 - 画質の評価は破綻、指示への一致、細部・質感、色を同じシードごとに確認します。再計時するときはComfyUIの実行キャッシュによる省略を除外してください。
 
 ## SCG・LEAPを試す
 
+- **SCGの2段生成**　[moss_scg_two_pass.json](workflows/moss_scg_two_pass.json) を読み込み、参照ワークフローと同じモデル・テキストエンコーダー・VAEを選んで実行します。両段のサンプラーはSCG Eulerです。1段目は18ステップの15番目で止め、その `output` をbicubicで1.5倍に拡大します。2段目は別の25ステップ列の5番目から最後まで20回更新します。両段ともsimple、CFG 6、shift 5で、2段目のシードは既定で `max(0, 1段目のシード − 7)` です。1段目をプレビューし、完成画像を `output/MoodyMoss/SCG_Two_Pass_*.png` に保存します。
+- **2段での強度比較**　1st Seedを `fixed` にすると、各段の `strength` を個別に比較できます。初期値は両段とも0.45で、0にした段は通常Eulerになります。配布設定の `packed` は参照画像不要です。実測プロファイルを接続する場合は、各段の解像度に合わせて個別に作成してください。
 - **SCG**: `workflows/moss_scg_ab.json`。モデルを選び、プロンプトを入力して実行すると、同一シードの通常EulerとSCGを1枚ずつ保存します。SCGは画像入力なしで、MOSS用VAEの潜在空間で調整した論文の式 (7) を使います。任意の参照画像で比較したい場合は、`MOSS-Image SCG Profile` の出力を `SCG Euler` の `profile` に接続します。
 - **LEAP**: `workflows/moss_leap_compare.json`。校正用と評価用のプロンプトを分け、Euler-25、Euler-15、LEAP（25更新・15回のguided評価）を比較します。初回は校正が走ります。
 - [実機での手順と計測値の読み方](docs/scg-leap-validation-ja.md) · [実装計画書](docs/superpowers/plans/2026-11-23-moss-scg-leap.md)

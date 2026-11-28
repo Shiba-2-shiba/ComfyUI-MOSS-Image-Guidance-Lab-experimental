@@ -50,5 +50,5 @@ def test_public_entrypoint_registers_only_scg_and_leap_nodes(monkeypatch):
 
 def test_distributed_editable_workflows_are_only_scg_and_leap():
     assert sorted(path.name for path in (ROOT / "workflows").glob("*.json")) == [
-        "moss_leap_compare.json", "moss_scg_ab.json",
+        "moss_leap_compare.json", "moss_scg_ab.json", "moss_scg_two_pass.json",
     ]

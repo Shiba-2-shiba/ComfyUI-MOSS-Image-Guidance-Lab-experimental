@@ -1,0 +1,1077 @@
+{
+  "id": "2177b01f-f9bc-4762-98ba-889044311b88",
+  "revision": 0,
+  "last_node_id": 19,
+  "last_link_id": 24,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MarkdownNote",
+      "pos": [
+        28,
+        45
+      ],
+      "size": [
+        405,
+        305
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "使い方 | Moody Moss Mix",
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "元の V5 ワークフローの通常生成を、ComfyUI 標準ノードで構成しています。\n\n1. 下のモデルローダーで手元のファイルを選択。\n2. プロンプトと解像度を調整し、Queue。\n3. 2nd Pass の PNG を、必要に応じて 02A または 02B の Load Image に読み込む。\n\n**モデルの配置先**\n- Moody Moss Mix V6 → `models/diffusion_models`\n- Qwen3.5 9B → `models/text_encoders`（CLIP type は `moss_image`）\n- FLUX.2 VAE → `models/vae`\n\n[Comfy-Org の Qwen / VAE 配布ページ](https://huggingface.co/Comfy-Org/MOSS-Image)"
+      ],
+      "color": "#232e2a",
+      "bgcolor": "#30463b"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        28,
+        392
+      ],
+      "size": [
+        405,
+        95
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "title": "Moody Moss Mix | 拡散モデル",
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "Moody-Moss-Mix-V6_00001__clean-int8_convrot.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        28,
+        530
+      ],
+      "size": [
+        405,
+        122
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2,
+            3
+          ]
+        }
+      ],
+      "title": "Qwen 3.5 9B | MOSS-Image",
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3.5_9b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_int8_convrot.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3.5_9b_int8_convrot.safetensors",
+        "moss_image",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        28,
+        697
+      ],
+      "size": [
+        405,
+        68
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            14,
+            17
+          ]
+        }
+      ],
+      "title": "FLUX.2 VAE",
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "flux2-vae.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        495,
+        45
+      ],
+      "size": [
+        405,
+        85
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            19,
+            22
+          ]
+        }
+      ],
+      "title": "MOSS shift | 5",
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        5,
+        "flow"
+      ],
+      "showAdvanced": true
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        495,
+        175
+      ],
+      "size": [
+        405,
+        280
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            20,
+            23
+          ]
+        }
+      ],
+      "title": "ポジティブプロンプト",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Unretouched candid portrait photograph inside a Japanese game store, bright fluorescent retail lighting, natural skin texture with visible pores and subtle digital grain.\n\n### 主体与神态\n\n19岁日本少女站在过道中，娇小纤瘦，娃娃脸软糯，白皙肌肤泛粉，双眼大而圆，睫毛纤长。她歪头对着镜头咧嘴憨笑，露出两颗尖尖的小虎牙。\n\n### 发型与饰品\n\n柔顺深棕色长直发垂落肩头，额前剪着空气刘海，脖颈戴着黑色蕾丝银十字架choker。\n\n### 服装穿搭\n\n身穿黑底白领日系地雷系哥特连衣裙，胸前系着黑色缎带蝴蝶结与十字架吊坠，收腰高腰线剪裁接白色蕾丝花边拼接的双层黑色蓬蓬裙摆，肩袖带黑色荷叶边。\n\n### 动作与道具\n\n双手在胸前捧着两盒PS5游戏光盘，指甲涂米白色指甲油。左侧手托印有“PS5”顶条、紫粉色都市插画、白色立体字样“grand theft auto VI”与左下角橙色“18”分级标的游戏盒；右侧手扶另一盒动感人物插画PS5游戏盒。\n\n### 环境背景\n\n置身日本游戏零售店窄过道，两侧白色货架排满游戏盒，上方悬挂“新作”“PS5”促销吊牌，背景处于浅景深虚化中。\n\n### 光影 / 色调\n\n商场顶灯从前方偏上均匀打亮少女面部与黑裙蕾丝质感，黑白裙装与彩色游戏盒对比鲜明。\n\n### 视角与画风\n\n平视中近景抓拍，画面截止于大腿上方，主体居中偏左。**Camera Angle: Eye-level medium shot / Shot size: Medium shot / Lens feel: 50mm f/1.8 prime lens.**"
+      ],
+      "color": "#232e2a",
+      "bgcolor": "#30463b"
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        495,
+        500
+      ],
+      "size": [
+        405,
+        150
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            21,
+            24
+          ]
+        }
+      ],
+      "title": "ネガティブプロンプト",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "worst quality, low quality, bad anatomy, deformed hands, extra fingers, malformed limbs, distorted face, plastic skin, overly smooth skin, waxy skin, oversharpening, excessive skin retouching, blurry, jpeg artifacts, watermark,"
+      ],
+      "color": "#302825",
+      "bgcolor": "#4b3630"
+    },
+    {
+      "id": 8,
+      "type": "ResolutionSelector",
+      "pos": [
+        495,
+        695
+      ],
+      "size": [
+        405,
+        162
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "title": "初期解像度 | 2:3・1.7 MP",
+      "properties": {
+        "Node name for S&R": "ResolutionSelector"
+      },
+      "widgets_values": [
+        "2:3 (Portrait Photo)",
+        1.7,
+        32
+      ],
+      "showAdvanced": true
+    },
+    {
+      "id": 9,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        495,
+        901
+      ],
+      "size": [
+        405,
+        94
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 4,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 5,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "MOSS-Image | 初期 Latent",
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1088,
+        1632,
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "PrimitiveInt",
+      "pos": [
+        965,
+        45
+      ],
+      "size": [
+        295,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            6,
+            9
+          ]
+        }
+      ],
+      "title": "1st Seed",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        393853800971818,
+        "randomize"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "PrimitiveInt",
+      "pos": [
+        1305,
+        45
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "title": "2nd Seed の差分",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        -7,
+        "fixed"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "ComfyMathExpression",
+      "pos": [
+        1305,
+        180
+      ],
+      "size": [
+        300,
+        139
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 6,
+          "label": "a"
+        },
+        {
+          "name": "values.b",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 7,
+          "label": "b",
+          "shape": 7
+        },
+        {
+          "name": "values.c",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": null,
+          "label": "c",
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": null
+        }
+      ],
+      "title": "2nd Seed | 1st Seed − 7",
+      "properties": {
+        "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+        "max(0, a + b)"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "KSamplerAdvanced",
+      "pos": [
+        965,
+        185
+      ],
+      "size": [
+        295,
+        310
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 19
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 20
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 21
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8
+        },
+        {
+          "name": "noise_seed",
+          "type": "INT",
+          "link": 9,
+          "widget": {
+            "name": "noise_seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            10,
+            13
+          ]
+        }
+      ],
+      "title": "1st Pass | 構図を生成",
+      "properties": {
+        "Node name for S&R": "KSamplerAdvanced"
+      },
+      "widgets_values": [
+        "enable",
+        393853800971818,
+        "fixed",
+        18,
+        3,
+        "er_sde",
+        "simple",
+        0,
+        15,
+        "enable"
+      ],
+      "color": "#222d37",
+      "bgcolor": "#304359",
+      "showAdvanced": true
+    },
+    {
+      "id": 14,
+      "type": "LatentUpscaleBy",
+      "pos": [
+        965,
+        540
+      ],
+      "size": [
+        295,
+        90
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "title": "Latent 拡大 | 1.5×",
+      "properties": {
+        "Node name for S&R": "LatentUpscaleBy"
+      },
+      "widgets_values": [
+        "bicubic",
+        1.5
+      ]
+    },
+    {
+      "id": 15,
+      "type": "KSamplerAdvanced",
+      "pos": [
+        1305,
+        370
+      ],
+      "size": [
+        300,
+        310
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 22
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 24
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 11
+        },
+        {
+          "name": "noise_seed",
+          "type": "INT",
+          "link": 12,
+          "widget": {
+            "name": "noise_seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "title": "2nd Pass | ディテールを生成",
+      "properties": {
+        "Node name for S&R": "KSamplerAdvanced"
+      },
+      "widgets_values": [
+        "enable",
+        393853800971811,
+        "fixed",
+        25,
+        3,
+        "er_sde",
+        "simple",
+        5,
+        25,
+        "disable"
+      ],
+      "color": "#222d37",
+      "bgcolor": "#304359",
+      "showAdvanced": true
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        965,
+        685
+      ],
+      "size": [
+        295,
+        60
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "title": "1st Pass | VAE Decode",
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 17,
+      "type": "PreviewImage",
+      "pos": [
+        965,
+        793
+      ],
+      "size": [
+        295,
+        250
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        }
+      ],
+      "outputs": [],
+      "title": "1st Pass | プレビュー",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 18,
+      "type": "VAEDecode",
+      "pos": [
+        1305,
+        730
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 16
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "title": "2nd Pass | VAE Decode",
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 19,
+      "type": "SaveImage",
+      "pos": [
+        1650,
+        370
+      ],
+      "size": [
+        350,
+        530
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [],
+      "title": "2nd Pass | PNG 保存",
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "MoodyMoss/01_Generation"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      3,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      3,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      8,
+      0,
+      9,
+      0,
+      "INT"
+    ],
+    [
+      5,
+      8,
+      1,
+      9,
+      1,
+      "INT"
+    ],
+    [
+      6,
+      10,
+      0,
+      12,
+      0,
+      "INT"
+    ],
+    [
+      7,
+      11,
+      0,
+      12,
+      1,
+      "INT"
+    ],
+    [
+      8,
+      9,
+      0,
+      13,
+      3,
+      "LATENT"
+    ],
+    [
+      9,
+      10,
+      0,
+      13,
+      4,
+      "INT"
+    ],
+    [
+      10,
+      13,
+      0,
+      14,
+      0,
+      "LATENT"
+    ],
+    [
+      11,
+      14,
+      0,
+      15,
+      3,
+      "LATENT"
+    ],
+    [
+      12,
+      12,
+      1,
+      15,
+      4,
+      "INT"
+    ],
+    [
+      13,
+      13,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      4,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      15,
+      0,
+      18,
+      0,
+      "LATENT"
+    ],
+    [
+      17,
+      4,
+      0,
+      18,
+      1,
+      "VAE"
+    ],
+    [
+      18,
+      18,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      19,
+      5,
+      0,
+      13,
+      0,
+      "MODEL"
+    ],
+    [
+      20,
+      6,
+      0,
+      13,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      21,
+      7,
+      0,
+      13,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      22,
+      5,
+      0,
+      15,
+      0,
+      "MODEL"
+    ],
+    [
+      23,
+      6,
+      0,
+      15,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      7,
+      0,
+      15,
+      2,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "モデル",
+      "bounding": [
+        10,
+        5,
+        442,
+        785
+      ],
+      "color": "#3e6251",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "プロンプトと解像度",
+      "bounding": [
+        476,
+        5,
+        442,
+        1015
+      ],
+      "color": "#3e6251",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "1st Pass",
+      "bounding": [
+        947,
+        5,
+        331,
+        1060
+      ],
+      "color": "#455e78",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "2nd Pass と保存",
+      "bounding": [
+        1288,
+        5,
+        730,
+        915
+      ],
+      "color": "#455e78",
+      "font_size": 22,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.61,
+      "offset": [
+        10,
+        20
+      ]
+    }
+  },
+  "version": 0.4
+}

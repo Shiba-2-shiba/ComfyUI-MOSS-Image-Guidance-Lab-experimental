@@ -23,6 +23,7 @@ _PROFILE_TYPE = "MOSS_SCG_PROFILE"
 _UNCONNECTED = object()
 _PACKED_CHANNELS = 128
 _SPATIAL_SCALE = 16
+_SAMPLING_PASSES = ("full", "first_pass", "second_pass")
 _CONFLICTS = (
     "sampler_cfg_function", "sampler_pre_cfg_function", "sampler_post_cfg_function",
     "sampler_calc_cond_batch_function", "model_function_wrapper", "denoise_mask_function", "wrappers",
@@ -160,7 +161,7 @@ def _reference_for(space, profile, x, geometry):
     return reference.to(x.device), pair_id, count
 
 
-def _runtime_sampler(model, latent, sigmas, extra_args, profile):
+def _runtime_sampler(model, latent, sigmas, extra_args, profile, sampling_pass):
     from comfy.samplers import CFGGuider, KSamplerX0Inpaint
 
     if not isinstance(model, KSamplerX0Inpaint) or not isinstance(model.inner_model, CFGGuider):
@@ -185,8 +186,8 @@ def _runtime_sampler(model, latent, sigmas, extra_args, profile):
     if extra_args.get("denoise_mask") is not None:
         raise ValueError("SCG does not support a denoise mask.")
     _guard_options(extra_args.get("model_options", {}))
-    if model.latent_image is not None and bool(torch.count_nonzero(model.latent_image)):
-        raise ValueError("SCG supports empty-latent T2I only, not image-to-image sampling.")
+    if sampling_pass != "second_pass" and model.latent_image is not None and bool(torch.count_nonzero(model.latent_image)):
+        raise ValueError("SCG full and first_pass require an empty T2I latent. Use second_pass for refinement.")
     for group in guider.conds.values():
         for condition in group or ():
             model_conds = condition.get("model_conds", {})
@@ -199,11 +200,17 @@ def _runtime_sampler(model, latent, sigmas, extra_args, profile):
                 raise ValueError("SCG does not support conditioning hooks or control models.")
     values = sigmas.detach().cpu().tolist() if sigmas.ndim == 1 else []
     if (
-        len(values) < 2 or values[-1] != 0.0 or not math.isclose(values[0], settings[1], abs_tol=1e-7)
-        or not all(math.isfinite(v) and 0 <= v <= 1 for v in values)
+        len(values) < 2 or not all(0 <= v <= min(1., settings[1] + 1e-7) for v in values)
         or not all(a > b for a, b in zip(values, values[1:]))
     ):
-        raise ValueError("SCG requires the full, descending positive sigma grid ending at zero (denoise=1).")
+        raise ValueError("SCG requires a finite, strictly descending sigma grid in the model's range.")
+    starts_at_max = math.isclose(values[0], settings[1], abs_tol=1e-7)
+    if sampling_pass == "full" and not (starts_at_max and values[-1] == 0):
+        raise ValueError("SCG full requires a sigma grid from model sigma_max to zero (denoise=1).")
+    if sampling_pass == "first_pass" and not (starts_at_max and values[-1] > 0):
+        raise ValueError("SCG first_pass requires a sigma grid from model sigma_max to a positive sigma.")
+    if sampling_pass == "second_pass" and (starts_at_max or values[-1] != 0):
+        raise ValueError("SCG second_pass requires a sigma grid starting below model sigma_max and ending at zero.")
     return values, settings[2]
 
 
@@ -238,13 +245,13 @@ def _trace_metadata(model, profile, args, values, strength, sigma_min, sigma_max
 
 
 def _make_sampler(profile, strength, sigma_min, sigma_max, debug_log="off", within_bin_mix=0., budget_trace="",
-                  spectrum_space="packed"):
+                  spectrum_space="packed", sampling_pass="full"):
     from comfy.k_diffusion.sampling import to_d
 
     @torch.no_grad()
     def sample(model, x, sigmas, extra_args=None, callback=None, disable=None):
         args = {} if extra_args is None else extra_args
-        values, noise_scale = _runtime_sampler(model, x, sigmas, args, profile)
+        values, noise_scale = _runtime_sampler(model, x, sigmas, args, profile, sampling_pass)
         active = [0 < sigma and sigma_min <= sigma <= sigma_max for sigma in values[1:]]
         tracing = debug_log != "off"
         context = nullcontext()
@@ -258,7 +265,8 @@ def _make_sampler(profile, strength, sigma_min, sigma_max, debug_log="off", with
         if tracing or budget_trace:
             metadata = _trace_metadata(model, profile, args, values, strength, sigma_min, sigma_max,
                                        debug_log, within_bin_mix, budget_trace)
-            metadata.update(spectrum_space=spectrum_space, paired_reference_id=pair_id, reference_count=count,
+            metadata.update(sampling_pass=sampling_pass, spectrum_space=spectrum_space,
+                            paired_reference_id=pair_id, reference_count=count,
                             budget_mode="total_l2" if total_only else ("per_ring" if budget_trace else "local"))
             if pair_id:
                 metadata["reference_kind"] = "bundled_measured" if profile is None else "measured"
@@ -342,19 +350,21 @@ class MossImageSCGEuler(io.ComfyNode):
                                 tooltip="Radial control run in output/moss_scg_debug. Spatial radial mode matches only its total L2 per sample and step."),
                 io.Combo.Input("spectrum_space", options=list(SPECTRUM_SPACES), default="packed", optional=True,
                                tooltip="packed keeps the original prior. The two measured modes use paired spectra from the same photos; spatial undoes FLUX.2 2x2 packing for the FFT."),
+                io.Combo.Input("sampling_pass", options=list(_SAMPLING_PASSES), default="full", optional=True,
+                               tooltip="Use full for one-pass T2I, first_pass for the high sigmas before latent upscale, and second_pass for the low sigmas after upscale."),
             ],
             outputs=[io.Sampler.Output("sampler")],
         )
 
     @classmethod
     def check_lazy_status(cls, profile=_UNCONNECTED, strength=.15, sigma_min=.10, sigma_max=.95, debug_log="off",
-                          within_bin_mix=0., budget_trace="", spectrum_space="packed"):
+                          within_bin_mix=0., budget_trace="", spectrum_space="packed", sampling_pass="full"):
         # ComfyUI omits unconnected optional inputs and passes None for a pending link.
         return ["profile"] if (strength != 0 or debug_log != "off") and profile is None else []
 
     @classmethod
     def execute(cls, profile=None, strength=.15, sigma_min=.10, sigma_max=.95, debug_log="off",
-                within_bin_mix=0., budget_trace="", spectrum_space="packed"):
+                within_bin_mix=0., budget_trace="", spectrum_space="packed", sampling_pass="full"):
         from comfy.samplers import KSAMPLER, ksampler
 
         strength = float(strength)
@@ -368,6 +378,8 @@ class MossImageSCGEuler(io.ComfyNode):
             raise ValueError("SCG within_bin_mix must be finite and within [0, 1].")
         if spectrum_space not in SPECTRUM_SPACES:
             raise ValueError(f"Unknown SCG spectrum_space: {spectrum_space!r}")
+        if sampling_pass not in _SAMPLING_PASSES:
+            raise ValueError(f"Unknown SCG sampling_pass: {sampling_pass!r}")
         if budget_trace and not (strength and (within_bin_mix or spectrum_space == "spatial_measured")):
             raise ValueError("SCG budget_trace requires nonzero strength and either spatial_measured or within_bin_mix.")
         if strength == 0 and debug_log == "off":
@@ -378,4 +390,4 @@ class MossImageSCGEuler(io.ComfyNode):
         if not (0 <= sigma_min <= sigma_max <= 1):
             raise ValueError("SCG requires a finite, ordered sigma window within [0, 1].")
         return io.NodeOutput(KSAMPLER(_make_sampler(profile, strength, sigma_min, sigma_max,
-                                                    debug_log, within_bin_mix, budget_trace, spectrum_space)))
+                                                    debug_log, within_bin_mix, budget_trace, spectrum_space, sampling_pass)))

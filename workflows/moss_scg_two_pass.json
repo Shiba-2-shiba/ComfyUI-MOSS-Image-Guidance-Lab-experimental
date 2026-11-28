@@ -1,0 +1,1528 @@
+{
+  "id": "2b7f5539-96e6-4178-8271-aa5aba582ac6",
+  "revision": 0,
+  "last_node_id": 28,
+  "last_link_id": 33,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MarkdownNote",
+      "pos": [
+        28,
+        45
+      ],
+      "size": [
+        405,
+        305
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "使い方 | Moody Moss Mix",
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "モデルを選び、プロンプトと解像度を調整して Queue。\n\n1段目は18ステップのうち15まで実行してlatentを1.5倍に拡大します。2段目は25ステップの5から再開します。\n\n各段の SCG Euler で補正強度を調整できます。strength を 0 にすると、その段は通常の Euler になります。"
+      ],
+      "color": "#232e2a",
+      "bgcolor": "#30463b"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        28,
+        392
+      ],
+      "size": [
+        405,
+        95
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "title": "Moody Moss Mix | 拡散モデル",
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "Moody-Moss-Mix-V6_00001__clean-int8_convrot.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        28,
+        530
+      ],
+      "size": [
+        405,
+        122
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            18,
+            19
+          ]
+        }
+      ],
+      "title": "Qwen 3.5 9B | MOSS-Image",
+      "properties": {
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3.5_9b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_int8_convrot.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3.5_9b_int8_convrot.safetensors",
+        "moss_image",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        28,
+        697
+      ],
+      "size": [
+        405,
+        68
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            26,
+            29
+          ]
+        }
+      ],
+      "title": "FLUX.2 VAE",
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "flux2-vae.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        495,
+        45
+      ],
+      "size": [
+        405,
+        85
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2,
+            10,
+            31
+          ]
+        }
+      ],
+      "title": "MOSS shift | 5",
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        5,
+        "flow"
+      ],
+      "showAdvanced": true
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        495,
+        175
+      ],
+      "size": [
+        405,
+        280
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            32
+          ]
+        }
+      ],
+      "title": "ポジティブプロンプト",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Unretouched candid portrait photograph inside a Japanese game store, bright fluorescent retail lighting, natural skin texture with visible pores and subtle digital grain.\n\n### 主体与神态\n\n19岁日本少女站在过道中，娇小纤瘦，娃娃脸软糯，白皙肌肤泛粉，双眼大而圆，睫毛纤长。她歪头对着镜头咧嘴憨笑，露出两颗尖尖的小虎牙。\n\n### 发型与饰品\n\n柔顺深棕色长直发垂落肩头，额前剪着空气刘海，脖颈戴着黑色蕾丝银十字架choker。\n\n### 服装穿搭\n\n身穿黑底白领日系地雷系哥特连衣裙，胸前系着黑色缎带蝴蝶结与十字架吊坠，收腰高腰线剪裁接白色蕾丝花边拼接的双层黑色蓬蓬裙摆，肩袖带黑色荷叶边。\n\n### 动作与道具\n\n双手在胸前捧着两盒PS5游戏光盘，指甲涂米白色指甲油。左侧手托印有“PS5”顶条、紫粉色都市插画、白色立体字样“grand theft auto VI”与左下角橙色“18”分级标的游戏盒；右侧手扶另一盒动感人物插画PS5游戏盒。\n\n### 环境背景\n\n置身日本游戏零售店窄过道，两侧白色货架排满游戏盒，上方悬挂“新作”“PS5”促销吊牌，背景处于浅景深虚化中。\n\n### 光影 / 色调\n\n商场顶灯从前方偏上均匀打亮少女面部与黑裙蕾丝质感，黑白裙装与彩色游戏盒对比鲜明。\n\n### 视角与画风\n\n平视中近景抓拍，画面截止于大腿上方，主体居中偏左。**Camera Angle: Eye-level medium shot / Shot size: Medium shot / Lens feel: 50mm f/1.8 prime lens.**"
+      ],
+      "color": "#232e2a",
+      "bgcolor": "#30463b"
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        495,
+        500
+      ],
+      "size": [
+        405,
+        150
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            33
+          ]
+        }
+      ],
+      "title": "ネガティブプロンプト",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "worst quality, low quality, bad anatomy, deformed hands, extra fingers, malformed limbs, distorted face, plastic skin, overly smooth skin, waxy skin, oversharpening, excessive skin retouching, blurry, jpeg artifacts, watermark,"
+      ],
+      "color": "#302825",
+      "bgcolor": "#4b3630"
+    },
+    {
+      "id": 8,
+      "type": "ResolutionSelector",
+      "pos": [
+        495,
+        695
+      ],
+      "size": [
+        405,
+        162
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            20
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "title": "初期解像度 | 2:3・1.7 MP",
+      "properties": {
+        "Node name for S&R": "ResolutionSelector"
+      },
+      "widgets_values": [
+        "2:3 (Portrait Photo)",
+        1.7,
+        32
+      ],
+      "showAdvanced": true
+    },
+    {
+      "id": 9,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        495,
+        901
+      ],
+      "size": [
+        405,
+        94
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 20,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 21,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "MOSS-Image | 初期 Latent",
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1088,
+        1632,
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "PrimitiveInt",
+      "pos": [
+        975,
+        45
+      ],
+      "size": [
+        295,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            1,
+            22
+          ]
+        }
+      ],
+      "title": "1st Seed",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        393853800971818,
+        "randomize"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "PrimitiveInt",
+      "pos": [
+        1735,
+        45
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "title": "2nd Seed の差分",
+      "properties": {
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        -7,
+        "fixed"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "ComfyMathExpression",
+      "pos": [
+        2075,
+        45
+      ],
+      "size": [
+        300,
+        139
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 22,
+          "label": "a"
+        },
+        {
+          "name": "values.b",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 23,
+          "label": "b",
+          "shape": 7
+        },
+        {
+          "name": "values.c",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": null,
+          "label": "c",
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": []
+        },
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": []
+        }
+      ],
+      "title": "2nd Seed | 1st Seed − 7",
+      "properties": {
+        "Node name for S&R": "ComfyMathExpression"
+      },
+      "widgets_values": [
+        "max(0, a + b)"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1320,
+        205
+      ],
+      "size": [
+        300,
+        135
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 4
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 5
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 6
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 7
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            24,
+            25
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "title": "1st Pass | 構図を生成",
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 14,
+      "type": "LatentUpscaleBy",
+      "pos": [
+        1320,
+        395
+      ],
+      "size": [
+        295,
+        90
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "title": "Latent 拡大 | 1.5×",
+      "properties": {
+        "Node name for S&R": "LatentUpscaleBy"
+      },
+      "widgets_values": [
+        "bicubic",
+        1.5
+      ]
+    },
+    {
+      "id": 15,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        2080,
+        370
+      ],
+      "size": [
+        300,
+        135
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 12
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 13
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 14
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 15
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            28
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "title": "2nd Pass | ディテールを生成",
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 16,
+      "type": "VAEDecode",
+      "pos": [
+        1320,
+        535
+      ],
+      "size": [
+        295,
+        60
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 25
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "title": "1st Pass | VAE Decode",
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 17,
+      "type": "PreviewImage",
+      "pos": [
+        1320,
+        650
+      ],
+      "size": [
+        295,
+        250
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "title": "1st Pass | プレビュー",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 18,
+      "type": "VAEDecode",
+      "pos": [
+        2075,
+        700
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 28
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            30
+          ]
+        }
+      ],
+      "title": "2nd Pass | VAE Decode",
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 19,
+      "type": "SaveImage",
+      "pos": [
+        2435,
+        370
+      ],
+      "size": [
+        350,
+        530
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 30
+        }
+      ],
+      "outputs": [],
+      "title": "2nd Pass | PNG 保存",
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "MoodyMoss/SCG_Two_Pass"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "CFGGuider",
+      "pos": [
+        495,
+        1040
+      ],
+      "size": [
+        405,
+        110
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 31
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 32
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            5,
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "共通 CFG",
+      "properties": {
+        "Node name for S&R": "CFGGuider"
+      },
+      "widgets_values": [
+        6
+      ]
+    },
+    {
+      "id": 21,
+      "type": "RandomNoise",
+      "pos": [
+        975,
+        190
+      ],
+      "size": [
+        295,
+        100
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise_seed",
+          "type": "INT",
+          "link": 1,
+          "widget": {
+            "name": "noise_seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "生成ノイズ",
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        393853800971818,
+        "fixed"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "BasicScheduler",
+      "pos": [
+        975,
+        350
+      ],
+      "size": [
+        295,
+        115
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "全ステップ",
+      "properties": {
+        "Node name for S&R": "BasicScheduler"
+      },
+      "widgets_values": [
+        "simple",
+        18,
+        1.0
+      ]
+    },
+    {
+      "id": 23,
+      "type": "SplitSigmas",
+      "pos": [
+        975,
+        525
+      ],
+      "size": [
+        295,
+        90
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "high_sigmas",
+          "type": "SIGMAS",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "low_sigmas",
+          "type": "SIGMAS",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "title": "1段目の終了位置",
+      "properties": {
+        "Node name for S&R": "SplitSigmas"
+      },
+      "widgets_values": [
+        15
+      ]
+    },
+    {
+      "id": 24,
+      "type": "MossImageSCGEuler",
+      "pos": [
+        975,
+        680
+      ],
+      "size": [
+        300,
+        285
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "profile",
+          "type": "MOSS_SCG_PROFILE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "1st Pass | SCG Euler",
+      "properties": {
+        "Node name for S&R": "MossImageSCGEuler"
+      },
+      "widgets_values": [
+        0.45,
+        0.1,
+        0.95,
+        "off",
+        0.0,
+        "",
+        "packed",
+        "first_pass"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "RandomNoise",
+      "pos": [
+        1735,
+        190
+      ],
+      "size": [
+        295,
+        100
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise_seed",
+          "type": "INT",
+          "link": 9,
+          "widget": {
+            "name": "noise_seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "生成ノイズ",
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        393853800971811,
+        "fixed"
+      ]
+    },
+    {
+      "id": 26,
+      "type": "BasicScheduler",
+      "pos": [
+        1735,
+        350
+      ],
+      "size": [
+        295,
+        115
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "全ステップ",
+      "properties": {
+        "Node name for S&R": "BasicScheduler"
+      },
+      "widgets_values": [
+        "simple",
+        25,
+        1.0
+      ]
+    },
+    {
+      "id": 27,
+      "type": "SplitSigmas",
+      "pos": [
+        1735,
+        525
+      ],
+      "size": [
+        295,
+        90
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "high_sigmas",
+          "type": "SIGMAS",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "low_sigmas",
+          "type": "SIGMAS",
+          "links": [
+            15
+          ],
+          "slot_index": 1
+        }
+      ],
+      "title": "2段目の開始位置",
+      "properties": {
+        "Node name for S&R": "SplitSigmas"
+      },
+      "widgets_values": [
+        5
+      ]
+    },
+    {
+      "id": 28,
+      "type": "MossImageSCGEuler",
+      "pos": [
+        1735,
+        680
+      ],
+      "size": [
+        300,
+        285
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "profile",
+          "type": "MOSS_SCG_PROFILE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "2nd Pass | SCG Euler",
+      "properties": {
+        "Node name for S&R": "MossImageSCGEuler"
+      },
+      "widgets_values": [
+        0.45,
+        0.1,
+        0.95,
+        "off",
+        0.0,
+        "",
+        "packed",
+        "second_pass"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      10,
+      0,
+      21,
+      0,
+      "INT"
+    ],
+    [
+      2,
+      5,
+      0,
+      22,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      22,
+      0,
+      23,
+      0,
+      "SIGMAS"
+    ],
+    [
+      4,
+      21,
+      0,
+      13,
+      0,
+      "NOISE"
+    ],
+    [
+      5,
+      20,
+      0,
+      13,
+      1,
+      "GUIDER"
+    ],
+    [
+      6,
+      24,
+      0,
+      13,
+      2,
+      "SAMPLER"
+    ],
+    [
+      7,
+      23,
+      0,
+      13,
+      3,
+      "SIGMAS"
+    ],
+    [
+      8,
+      9,
+      0,
+      13,
+      4,
+      "LATENT"
+    ],
+    [
+      9,
+      12,
+      1,
+      25,
+      0,
+      "INT"
+    ],
+    [
+      10,
+      5,
+      0,
+      26,
+      0,
+      "MODEL"
+    ],
+    [
+      11,
+      26,
+      0,
+      27,
+      0,
+      "SIGMAS"
+    ],
+    [
+      12,
+      25,
+      0,
+      15,
+      0,
+      "NOISE"
+    ],
+    [
+      13,
+      20,
+      0,
+      15,
+      1,
+      "GUIDER"
+    ],
+    [
+      14,
+      28,
+      0,
+      15,
+      2,
+      "SAMPLER"
+    ],
+    [
+      15,
+      27,
+      1,
+      15,
+      3,
+      "SIGMAS"
+    ],
+    [
+      16,
+      14,
+      0,
+      15,
+      4,
+      "LATENT"
+    ],
+    [
+      17,
+      2,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      18,
+      3,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      19,
+      3,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      20,
+      8,
+      0,
+      9,
+      0,
+      "INT"
+    ],
+    [
+      21,
+      8,
+      1,
+      9,
+      1,
+      "INT"
+    ],
+    [
+      22,
+      10,
+      0,
+      12,
+      0,
+      "INT"
+    ],
+    [
+      23,
+      11,
+      0,
+      12,
+      1,
+      "INT"
+    ],
+    [
+      24,
+      13,
+      0,
+      14,
+      0,
+      "LATENT"
+    ],
+    [
+      25,
+      13,
+      0,
+      16,
+      0,
+      "LATENT"
+    ],
+    [
+      26,
+      4,
+      0,
+      16,
+      1,
+      "VAE"
+    ],
+    [
+      27,
+      16,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      15,
+      0,
+      18,
+      0,
+      "LATENT"
+    ],
+    [
+      29,
+      4,
+      0,
+      18,
+      1,
+      "VAE"
+    ],
+    [
+      30,
+      18,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      5,
+      0,
+      20,
+      0,
+      "MODEL"
+    ],
+    [
+      32,
+      6,
+      0,
+      20,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      33,
+      7,
+      0,
+      20,
+      2,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "モデル",
+      "bounding": [
+        10,
+        5,
+        442,
+        785
+      ],
+      "color": "#3e6251",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "プロンプトと解像度",
+      "bounding": [
+        476,
+        5,
+        442,
+        1170
+      ],
+      "color": "#3e6251",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "1st Pass",
+      "bounding": [
+        947,
+        5,
+        720,
+        1000
+      ],
+      "color": "#455e78",
+      "font_size": 22,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "2nd Pass と保存",
+      "bounding": [
+        1705,
+        5,
+        1100,
+        1000
+      ],
+      "color": "#455e78",
+      "font_size": 22,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.48,
+      "offset": [
+        10,
+        20
+      ]
+    }
+  },
+  "version": 0.4
+}
