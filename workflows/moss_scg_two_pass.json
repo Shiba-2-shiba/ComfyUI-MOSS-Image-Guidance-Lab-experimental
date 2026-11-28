@@ -1015,7 +1015,17 @@
         "",
         "packed",
         "first_pass"
-      ]
+      ],
+      "widgets_values_named": {
+        "strength": 0.45,
+        "sigma_min": 0.1,
+        "sigma_max": 0.95,
+        "debug_log": "off",
+        "within_bin_mix": 0.0,
+        "budget_trace": "",
+        "spectrum_space": "packed",
+        "sampling_pass": "first_pass"
+      }
     },
     {
       "id": 25,
@@ -1191,7 +1201,17 @@
         "",
         "packed",
         "second_pass"
-      ]
+      ],
+      "widgets_values_named": {
+        "strength": 0.45,
+        "sigma_min": 0.1,
+        "sigma_max": 0.95,
+        "debug_log": "off",
+        "within_bin_mix": 0.0,
+        "budget_trace": "",
+        "spectrum_space": "packed",
+        "sampling_pass": "second_pass"
+      }
     }
   ],
   "links": [

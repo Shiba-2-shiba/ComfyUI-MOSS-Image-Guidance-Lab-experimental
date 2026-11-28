@@ -21,8 +21,11 @@ def check_two_pass(model, addon, empty):
     model, = ModelSamplingAuraFlow().patch_aura(model, 5, "flow")
     positive, negative = [[torch.full((1, 3, 8), .5), {}]], [[torch.zeros(1, 3, 8), {}]]
     guider, = CFGGuider.execute(model, positive, negative, 6.).result
+    graph = json.loads((Path(__file__).resolve().parents[1] / "workflows/moss_scg_two_pass.json").read_bytes())
+    settings = {n["widgets_values_named"]["sampling_pass"]: n["widgets_values_named"]
+                for n in graph["nodes"] if n["type"] == "MossImageSCGEuler"}
 
-    def run_pass(latent, stage, steps, cut, seed, strength):
+    def run_pass(latent, stage, steps, cut, seed, strength, omit_pass=False):
         first = stage == "first_pass"
         if strength is None:
             return KSamplerAdvanced().sample(
@@ -31,18 +34,22 @@ def check_two_pass(model, addon, empty):
             )[0]
         grid, = BasicScheduler.execute(model, "simple", steps, 1.).result
         sigmas = SplitSigmas.execute(grid, cut).result[0 if first else 1]
-        sampler, = addon.MossImageSCGEuler.execute(strength=strength, sampling_pass=stage).result
+        inputs = dict(settings[stage], strength=strength)
+        if omit_pass:
+            del inputs["sampling_pass"]
+        sampler, = addon.MossImageSCGEuler.execute(**inputs).result
         noise, = RandomNoise.execute(seed).result
         return SamplerCustomAdvanced.execute(noise, guider, sampler, sigmas, latent).result[0]
 
     runs = []
-    for strength in (None, 0., .45):
-        first = run_pass({"samples": empty}, "first_pass", 18, 15, 42, strength)
+    for strength, omit_pass in ((None, False), (0., False), (.45, False), (.45, True)):
+        first = run_pass({"samples": empty}, "first_pass", 18, 15, 42, strength, omit_pass)
         enlarged, = LatentUpscaleBy().upscale(first, "bicubic", 1.5)
-        final = run_pass(enlarged, "second_pass", 25, 5, 35, strength)
+        final = run_pass(enlarged, "second_pass", 25, 5, 35, strength, omit_pass)
         runs.append((first["samples"], final["samples"]))
-    for baseline, disabled, corrected in zip(*runs):
+    for baseline, disabled, corrected, inferred in zip(*runs):
         assert torch.equal(baseline, disabled)
+        assert torch.equal(corrected, inferred)
         assert torch.isfinite(corrected).all() and not torch.equal(baseline, corrected)
     same_latent_control = run_pass(enlarged, "second_pass", 25, 5, 35, None)
     assert not torch.equal(same_latent_control["samples"], runs[-1][1])

@@ -165,11 +165,16 @@ def test_scg_pass_uses_only_supplied_updates(nodes, inputs, stage, grid):
     assert [s.item() for _, s in wrapped.calls] == pytest.approx(grid[:-1])
     assert torch.isfinite(actual).all()
     assert not torch.equal(actual, stock_euler(KSamplerX0Inpaint(model), x, sigmas))
+    inferred = KSamplerX0Inpaint(model)
+    inferred.latent_image = wrapped.latent_image
+    assert torch.equal(sampler(nodes)(inferred, x, sigmas, disable=True), actual)
+    assert len(inferred.calls) == len(wrapped.calls)
 
 
 @pytest.mark.parametrize("stage,grid", [
     ("first_pass", [.8, .5]), ("second_pass", [.8, .5]), ("second_pass", [1., .5, 0.]),
     ("second_pass", [.8, .8, 0.]), ("first_pass", [1., float("nan"), .4]),
+    ("auto", [.8, .5]), ("auto", [.8, .5, 0.]),
 ])
 def test_scg_pass_rejects_invalid_grid_before_sampling(nodes, inputs, stage, grid):
     model, _, _, x = inputs
@@ -186,7 +191,7 @@ def test_schema_and_calibration_use_input_vae_and_normalize_once(nodes, inputs):
     assert [p.name for p in profile_node.inputs] == ["model", "vae", "images"]
     assert [p.name for p in sampler_node.inputs] == ["profile", "strength", "sigma_min", "sigma_max", "debug_log",
                                                       "within_bin_mix", "budget_trace", "spectrum_space", "sampling_pass"]
-    assert [p.default for p in sampler_node.inputs[-5:]] == ["off", 0., "", "packed", "full"]
+    assert [p.default for p in sampler_node.inputs[-5:]] == ["off", 0., "", "packed", "auto"]
     profile = build(nodes, inputs)
     assert model.normalized == 1
     assert vae.inputs == [images]
@@ -296,7 +301,7 @@ def test_disabled_sampler_does_not_request_a_connected_profile(nodes, inputs):
 )
 def test_unsupported_sampler_data_rejects_before_a_denoiser_call(nodes, inputs, mutate, match):
     model, _, _, x = inputs
-    loop = sampler(nodes, build(nodes, inputs))
+    loop = sampler(nodes, build(nodes, inputs), sampling_pass="full")
     wrapped, sigmas, extra = KSamplerX0Inpaint(model), torch.tensor([1.0, .5, 0.0]), {}
     mutate(wrapped, x, sigmas, extra)
     with pytest.raises(ValueError, match=match):

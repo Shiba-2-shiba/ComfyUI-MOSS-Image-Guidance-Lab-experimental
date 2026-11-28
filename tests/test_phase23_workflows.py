@@ -72,6 +72,9 @@ def test_two_pass_scg_matches_native_generation_handoff():
         scg = nodes[inputs["sampler"]]
         assert scg["type"] == "MossImageSCGEuler" and scg["widgets_values"][-2:] == ["packed", stage]
         assert scg["widgets_values"][0] == 0.45
+        widget_names = ("strength", "sigma_min", "sigma_max", "debug_log", "within_bin_mix",
+                        "budget_trace", "spectrum_space", "sampling_pass")
+        assert scg["widgets_values_named"] == dict(zip(widget_names, scg["widgets_values"], strict=True))
         guider = nodes[inputs["guider"]]
         assert guider["type"] == "CFGGuider" and guider["widgets_values"] == [6]
         assert sources(guider) == {"model": 5, "positive": 6, "negative": 7}
